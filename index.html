@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAA Holds — Problem Framing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #f5f0e8;
+    --paper: #faf7f2;
+    --ink: #1a1612;
+    --indigo: #2d3d8f;
+    --gold: #c49a2a;
+    --rust: #b84d24;
+    --sage: #4a6b4c;
+    --muted: #7a7268;
+    --line: rgba(26,22,18,0.12);
+    --light-indigo: rgba(45,61,143,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Lora', serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(26,22,18,0.025) 27px, rgba(26,22,18,0.025) 28px);
+    pointer-events: none; z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; left: 88px; top: 0; bottom: 0; width: 1px;
+    background: rgba(180,60,30,0.2);
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 3.5rem 3rem 5rem; }
+
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(16px);  } to { opacity:1; transform:translateY(0); } }
+
+  /* HEADER */
+  .header { display:grid; grid-template-columns:1fr auto; align-items:end; border-bottom:2px solid var(--ink); padding-bottom:1.5rem; margin-bottom:3rem; animation:fadeDown 0.6s ease both; }
+  .eyebrow { font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; }
+  .header h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,8vw,5.5rem); letter-spacing:0.04em; line-height:0.9; color:var(--ink); }
+  .header h1 span { color:var(--indigo); }
+  .header-right { text-align:right; font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); line-height:2; }
+
+  /* SECTION */
+  .section { margin-bottom:3rem; animation:fadeUp 0.5s ease both; }
+  .section:nth-child(2){animation-delay:0.1s;} .section:nth-child(3){animation-delay:0.15s;} .section:nth-child(4){animation-delay:0.2s;} .section:nth-child(5){animation-delay:0.25s;} .section:nth-child(6){animation-delay:0.3s;} .section:nth-child(7){animation-delay:0.35s;} .section:nth-child(8){animation-delay:0.4s;}
+  .section-header { display:flex; align-items:baseline; gap:1rem; border-bottom:1px solid var(--line); padding-bottom:0.6rem; margin-bottom:1.4rem; }
+  .section-num { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:0.06em; color:var(--indigo); flex:1; }
+  .section-tag { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:0.15em; text-transform:uppercase; padding:0.2rem 0.6rem; border-radius:2px; margin-left:auto; flex-shrink:0; }
+  .tag-answered { background:rgba(74,107,76,0.12); color:var(--sage); border:1px solid rgba(74,107,76,0.3); }
+  .tag-partial  { background:rgba(196,154,42,0.12); color:var(--gold); border:1px solid rgba(196,154,42,0.3); }
+  .tag-gap      { background:rgba(184,77,36,0.1);  color:var(--rust); border:1px solid rgba(184,77,36,0.25); }
+
+  /* IDEA BLOCK */
+  .idea-block { background:var(--indigo); color:var(--paper); padding:1.8rem 2rem; border-radius:2px; position:relative; overflow:hidden; }
+  .idea-block::before { content:'"'; position:absolute; right:1.5rem; top:-0.5rem; font-family:'Lora',serif; font-size:8rem; color:rgba(255,255,255,0.06); line-height:1; }
+  .idea-block p { font-size:1.05rem; line-height:1.75; font-style:italic; position:relative; z-index:1; }
+  .idea-source { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.15em; text-transform:uppercase; color:rgba(240,232,216,0.5); margin-top:1rem; position:relative; z-index:1; }
+
+  /* 5 WHYS */
+  .whys-chain { display:flex; flex-direction:column; gap:0; }
+  .why-item { display:grid; grid-template-columns:48px 1fr; gap:0; position:relative; }
+  .why-item:not(:last-child) .why-line { position:absolute; left:23px; top:44px; bottom:0; width:2px; background:var(--line); }
+  .why-num-col { display:flex; flex-direction:column; align-items:center; padding-top:12px; position:relative; z-index:1; }
+  .why-circle { width:28px; height:28px; border-radius:50%; background:var(--indigo); color:white; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:0.6rem; font-weight:500; flex-shrink:0; }
+  .why-content { padding:0.8rem 0 1.4rem 1rem; }
+  .why-q { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+  .why-a { font-size:0.88rem; line-height:1.7; color:var(--ink); }
+  .why-a strong { color:var(--indigo); font-weight:600; }
+
+  /* PROB EXPLORATION */
+  .prob-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .prob-card { padding:1.2rem 1.4rem; border-radius:2px; border:1px solid var(--line); background:var(--paper); }
+  .prob-card.full { grid-column:1 / -1; }
+  .prob-card .pc-label { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:0.6rem; }
+  .prob-card .pc-text { font-size:0.85rem; line-height:1.75; color:var(--ink); }
+  .prob-card .pc-text strong { color:var(--indigo); }
+  .prob-card.highlight { background:var(--light-indigo); border-color:rgba(45,61,143,0.2); border-left:3px solid var(--indigo); }
+
+  /* AUDIENCE */
+  .audience-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+  .aud-card { background:var(--paper); border:1px solid var(--line); border-radius:2px; padding:1.2rem 1.4rem; }
+  .aud-card .ac-label { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:0.5rem; }
+  .aud-card .ac-label.know { color:var(--sage); } .aud-card .ac-label.dont { color:var(--rust); } .aud-card .ac-label.need { color:var(--gold); }
+  .aud-card ul { list-style:none; display:flex; flex-direction:column; gap:0.35rem; margin-top:0.2rem; }
+  .aud-card ul li { font-size:0.8rem; line-height:1.5; color:var(--ink); padding-left:1rem; position:relative; }
+  .aud-card ul li::before { content:'→'; position:absolute; left:0; color:var(--muted); font-size:0.7rem; }
+
+  /* PROBLEM STATEMENT */
+  .statement-block { background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--indigo); padding:1.8rem 2rem; border-radius:2px; margin-bottom:1rem; }
+  .statement-block .stmt-label { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--indigo); margin-bottom:0.8rem; }
+  .statement-block .stmt-text { font-size:1rem; line-height:1.8; font-style:italic; color:var(--ink); }
+  .statement-block .stmt-text strong { font-style:normal; color:var(--indigo); }
+  .gaps-row { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem; }
+  .gap-tag { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; padding:0.3rem 0.7rem; border-radius:2px; background:rgba(184,77,36,0.08); border:1px solid rgba(184,77,36,0.22); color:var(--rust); }
+  .gap-tag::before { content:'? '; opacity:0.6; }
+
+  /* INFO SCAN */
+  .scan-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .scan-card { background:var(--paper); border:1px solid var(--line); border-radius:2px; padding:1.2rem 1.4rem; }
+  .scan-card .sc-label { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:0.6rem; }
+  .scan-card ul { list-style:none; display:flex; flex-direction:column; gap:0.4rem; }
+  .scan-card ul li { font-size:0.8rem; line-height:1.55; color:var(--ink); padding-left:1rem; position:relative; }
+  .scan-card ul li::before { content:'→'; position:absolute; left:0; color:var(--muted); font-size:0.7rem; }
+
+  /* ASSUMPTIONS */
+  .assumptions-list { display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.5rem; }
+  .assumption { display:grid; grid-template-columns:auto 1fr auto; gap:0.8rem; align-items:start; padding:0.7rem 1rem; background:var(--paper); border:1px solid var(--line); border-radius:2px; }
+  .assumption .a-num { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:0.15em; color:var(--muted); padding-top:2px; text-transform:uppercase; }
+  .assumption .a-text { font-size:0.8rem; line-height:1.6; color:var(--ink); font-style:italic; }
+  .assumption .a-confidence { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:0.1em; text-transform:uppercase; padding:0.18rem 0.5rem; border-radius:2px; white-space:nowrap; align-self:start; margin-top:1px; }
+  .conf-low { background:rgba(184,77,36,0.1); color:var(--rust); border:1px solid rgba(184,77,36,0.2); }
+  .conf-med { background:rgba(196,154,42,0.1); color:var(--gold); border:1px solid rgba(196,154,42,0.2); }
+  .conf-high { background:rgba(74,107,76,0.1); color:var(--sage); border:1px solid rgba(74,107,76,0.2); }
+
+  /* NEXT STEPS */
+  .next-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-top:0.5rem; }
+  .next-card { background:var(--paper); border:1px solid var(--line); border-top:3px solid var(--indigo); border-radius:2px; padding:1.2rem 1.4rem; position:relative; }
+  .next-card .priority-badge { position:absolute; top:-1px; right:1rem; font-family:'DM Mono',monospace; font-size:0.48rem; letter-spacing:0.15em; text-transform:uppercase; background:var(--indigo); color:white; padding:0.15rem 0.5rem; border-radius:0 0 2px 2px; }
+  .next-card .nc-num { font-family:'DM Mono',monospace; font-size:0.5rem; letter-spacing:0.2em; color:var(--muted); margin-bottom:0.4rem; text-transform:uppercase; }
+  .next-card .nc-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:0.06em; color:var(--indigo); margin-bottom:0.5rem; }
+  .next-card .nc-text { font-size:0.78rem; line-height:1.6; color:var(--muted); }
+  .next-card .nc-action { font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:0.08em; color:var(--sage); margin-top:0.6rem; border-top:1px solid var(--line); padding-top:0.5rem; }
+  .next-card .nc-action::before { content:'First step → '; opacity:0.6; }
+
+  /* FOOTER */
+  .footer { border-top:2px solid var(--ink); padding-top:1.2rem; display:flex; justify-content:space-between; align-items:center; margin-top:3rem; animation:fadeUp 0.5s 0.5s ease both; }
+  .footer-left { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:0.08em; color:var(--indigo); }
+  .footer-left span { display:block; font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-top:2px; font-weight:normal; }
+  .footer-right { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-align:right; line-height:2; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="eyebrow">Baron Carr · Craig Newmark Graduate School of Journalism · CUNY · 2026</div>
+      <h1>Idea to<br><span>Problem Framing</span></h1>
+    </div>
+    <div class="header-right">HAA Holds<br>EJ Practicum<br>Assignment 01<br>2026</div>
+  </div>
+
+  <!-- 01 YOUR IDEA -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Your Idea</span>
+      <span class="section-tag tag-answered">Answered</span>
+    </div>
+    <div class="idea-block">
+      <p>HAA Holds is a service journalism initiative embedded inside Harlem Arts Alliance. The goal is to give HAA member organizations, working artists, and Harlem's broader cultural community the civic knowledge and tools they need to protect what they've built — and shape what comes next. The idea came directly from working with HAA and watching established arts organizations miss the civic moments that decided their future: budget hearings, land use decisions, public comment periods. They weren't absent because they didn't care. Nobody had ever mapped the terrain for them.</p>
+      <div class="idea-source">Origin: Direct experience working with Harlem Arts Alliance · Publication Home: Harlem World Magazine</div>
+    </div>
+  </div>
+
+  <!-- 02 5 WHYS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">5 Whys</span>
+      <span class="section-tag tag-answered">Answered</span>
+    </div>
+    <div class="whys-chain">
+
+      <div class="why-item">
+        <div class="why-line"></div>
+        <div class="why-num-col"><div class="why-circle">1</div></div>
+        <div class="why-content">
+          <div class="why-q">Why does HAA Holds need to exist?</div>
+          <div class="why-a">Because Harlem's arts organizations keep missing the civic moments — budget hearings, land use decisions, public comment periods — that decide whether they survive. <strong>They're not at the table when their future gets decided.</strong></div>
+        </div>
+      </div>
+
+      <div class="why-item">
+        <div class="why-line"></div>
+        <div class="why-num-col"><div class="why-circle">2</div></div>
+        <div class="why-content">
+          <div class="why-q">Why are arts organizations missing those moments?</div>
+          <div class="why-a">Because they don't know when those moments are happening, how to take part, or who makes the decisions they need to influence. <strong>The civic calendar and the advocacy tools are invisible to most HAA member organizations.</strong></div>
+        </div>
+      </div>
+
+      <div class="why-item">
+        <div class="why-line"></div>
+        <div class="why-num-col"><div class="why-circle">3</div></div>
+        <div class="why-content">
+          <div class="why-q">Why is that civic knowledge invisible to them?</div>
+          <div class="why-a">Because arts organizations in Harlem run lean — often one or two people managing everything — and civic literacy has never been built into the arts sector's infrastructure. <strong>Nobody taught it, nobody resourced it, and the systems that hold it are built to be hard to navigate.</strong></div>
+        </div>
+      </div>
+
+      <div class="why-item">
+        <div class="why-line"></div>
+        <div class="why-num-col"><div class="why-circle">4</div></div>
+        <div class="why-content">
+          <div class="why-q">Why hasn't anyone built this civic infrastructure for Harlem's arts community?</div>
+          <div class="why-a">Because journalism has historically covered arts institutions as cultural subjects — reviewing shows, profiling leaders, documenting history — not as civic actors with rights and power to use. <strong>Service journalism has never been applied to the arts community's civic life.</strong></div>
+        </div>
+      </div>
+
+      <div class="why-item">
+        <div class="why-num-col"><div class="why-circle">5</div></div>
+        <div class="why-content">
+          <div class="why-q">Why does this matter now?</div>
+          <div class="why-a">Because the pressure on Harlem's cultural institutions — rising rents, arts funding cuts, neighborhood displacement — is moving fast. Organizations that don't know how to advocate for themselves in the next two or three years may not be here in five. <strong>The civic window is open and most of Harlem's arts organizations don't know it's there.</strong></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 03 PROBLEM EXPLORATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Problem Exploration</span>
+      <span class="section-tag tag-answered">Answered</span>
+    </div>
+    <div class="prob-grid">
+
+      <div class="prob-card full highlight">
+        <div class="pc-label">Underlying Problem</div>
+        <div class="pc-text">Harlem's arts organizations are losing ground — to displacement, defunding, and policy decisions made without them — <strong>not because they lack power, but because they lack access to the civic knowledge that would let them use it.</strong> The information exists. The processes are public. The officials are reachable. But no one has translated any of it into something resource-thin arts organizations can act on.</div>
+      </div>
+
+      <div class="prob-card">
+        <div class="pc-label">Factors That Shape the Problem</div>
+        <div class="pc-text">HAA member organizations are small, under-resourced, and usually led by artists or cultural workers — not policy professionals. NYC's civic calendar is dense and hard to follow. Arts funding is politically discretionary and requires relationships most orgs don't have. And years of being ignored or failed by civic systems has built real distrust that makes showing up feel risky instead of powerful.</div>
+      </div>
+
+      <div class="prob-card">
+        <div class="pc-label">If HAA Holds Works, It Will...</div>
+        <div class="pc-text">Give HAA member organizations a clear civic map — who holds power, when decisions are made, how to show up and be heard. It will demystify testimony, budget advocacy, and land use processes through service journalism that treats civic participation as a learnable skill, not a privilege. Over time, it builds a community of arts advocates who show up together — not just in crisis.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 04 AUDIENCE EXPLORATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Audience Exploration</span>
+      <span class="section-tag tag-partial">Partially Known</span>
+    </div>
+    <div class="audience-grid">
+
+      <div class="aud-card">
+        <div class="ac-label know">Who the Problem Affects</div>
+        <ul>
+          <li>HAA member organizations — arts nonprofits, cultural spaces, performing arts groups across Upper Manhattan</li>
+          <li>Individual working artists whose livelihoods depend on those organizations surviving</li>
+          <li>Emerging artists and cultural workers with no civic literacy baseline</li>
+          <li>HAA leadership navigating policy decisions on behalf of their members</li>
+        </ul>
+      </div>
+
+      <div class="aud-card">
+        <div class="ac-label dont">Why They'd Engage</div>
+        <ul>
+          <li>They're already feeling the pressure — rent, funding cuts, displacement — and looking for tools</li>
+          <li>HAA delivering the content means it arrives through a relationship, not a cold channel</li>
+          <li>Civic tools reframe participation as power rather than risk — a real shift for communities with justified distrust of institutions</li>
+          <li>Actionable content is rare; most civic information is dense and hard to use</li>
+        </ul>
+      </div>
+
+      <div class="aud-card">
+        <div class="ac-label need">What I Know & How</div>
+        <ul>
+          <li>I have direct relationships with people inside HAA — not a survey, but real conversations</li>
+          <li>I know HAA's organizational culture and how members relate to leadership</li>
+          <li>I don't yet know how individual member orgs consume content or what formats work best</li>
+          <li>I don't know which civic processes feel most confusing or urgent to members right now</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 05 PROBLEM STATEMENT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Problem Definition</span>
+      <span class="section-tag tag-partial">Hypothesis</span>
+    </div>
+    <div class="statement-block">
+      <div class="stmt-label">Problem Statement — Working Hypothesis, Not Conclusion</div>
+      <div class="stmt-text">
+        Harlem's arts organizations — <strong>HAA member organizations included</strong> — keep missing the civic processes that decide their survival. Not because they don't care. Because <strong>no trusted, accessible, arts-focused civic resource exists</strong> to tell them when to show up, how to speak, who holds the decisions, or that their presence matters at all. If HAA Holds can deliver that resource — through service journalism on channels HAA's community already trusts — it may begin to shift arts organizations from civic observers to civic actors. <strong>Whether HAA members actually want this content, in this form, from this source, is the central hypothesis still to be tested.</strong>
+      </div>
+    </div>
+    <div class="eyebrow" style="margin-bottom:0.4rem;">Information Gaps in This Statement</div>
+    <div class="gaps-row">
+      <span class="gap-tag">Do HAA members want this content</span>
+      <span class="gap-tag">Which civic processes feel most urgent to them</span>
+      <span class="gap-tag">Is HWM the right publication home</span>
+      <span class="gap-tag">Who are the right elected officials to map</span>
+      <span class="gap-tag">What format actually reaches them</span>
+      <span class="gap-tag">Does HAA leadership support this editorially</span>
+    </div>
+  </div>
+
+  <!-- 06 INFORMATION SCAN -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Information Scan</span>
+      <span class="section-tag tag-partial">In Progress</span>
+    </div>
+    <div class="scan-grid">
+
+      <div class="scan-card">
+        <div class="sc-label">What I Need to Know</div>
+        <ul>
+          <li>Which civic processes HAA members find most confusing or intimidating</li>
+          <li>What content HAA's YouTube and Instagram audience engages with most right now</li>
+          <li>Which elected officials have direct jurisdiction over arts funding and cultural space in Harlem</li>
+          <li>Whether Harlem World Magazine has the reach and trust to serve as the publication home</li>
+          <li>What similar civic journalism initiatives have tried — and what worked</li>
+        </ul>
+      </div>
+
+      <div class="scan-card">
+        <div class="sc-label">Data I'm Already Using</div>
+        <ul>
+          <li>Direct relationships and conversations with specific HAA staff and leadership</li>
+          <li>Firsthand experience with HAA's organizational culture and member dynamics</li>
+          <li>Working knowledge of Harlem World Magazine as a community publication</li>
+          <li>General knowledge of NYC civic structures — community boards, City Council, DCA</li>
+        </ul>
+      </div>
+
+      <div class="scan-card">
+        <div class="sc-label">Data That Exists — Not Yet Used</div>
+        <ul>
+          <li>HAA membership data — size, org type, geographic distribution</li>
+          <li>NYC Department of Cultural Affairs funding records — who's getting what and who's not</li>
+          <li>Community Board 10 meeting minutes and attendance records</li>
+          <li>HWM audience analytics — reach, demographics, engagement rates</li>
+          <li>HAA YouTube and Instagram analytics — current performance by content type</li>
+        </ul>
+      </div>
+
+      <div class="scan-card">
+        <div class="sc-label">New Data I Could Create</div>
+        <ul>
+          <li>Listening sessions with HAA members — direct conversations to surface real civic confusion points</li>
+          <li>Short survey of HAA member orgs on civic participation history and what stops them</li>
+          <li>Mapping exercise: which HAA member orgs have testified, attended CB10, or engaged elected officials — and which haven't</li>
+          <li>One pilot explainer piece — to measure actual engagement before full commitment</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 07 ASSUMPTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Assumptions & Open Questions</span>
+      <span class="section-tag tag-gap">Needs Research</span>
+    </div>
+    <div class="assumptions-list">
+      <div class="assumption">
+        <span class="a-num">A·01</span>
+        <span class="a-text">HAA member organizations want civic advocacy content and will engage with it if it's accessible and delivered through a trusted source.</span>
+        <span class="a-confidence conf-low">Low confidence</span>
+      </div>
+      <div class="assumption">
+        <span class="a-num">A·02</span>
+        <span class="a-text">HAA's YouTube and Instagram channels are active enough to serve as real distribution for this content.</span>
+        <span class="a-confidence conf-med">Medium confidence</span>
+      </div>
+      <div class="assumption">
+        <span class="a-num">A·03</span>
+        <span class="a-text">Harlem World Magazine is trusted by HAA's audience and can serve as the editorial home.</span>
+        <span class="a-confidence conf-low">Low confidence</span>
+      </div>
+      <div class="assumption">
+        <span class="a-num">A·04</span>
+        <span class="a-text">The civic processes most confusing to HAA members are community board participation, budget testimony, and land use hearings.</span>
+        <span class="a-confidence conf-med">Medium confidence</span>
+      </div>
+      <div class="assumption">
+        <span class="a-num">A·05</span>
+        <span class="a-text">HAA leadership will support editorially independent journalism produced from inside the organization.</span>
+        <span class="a-confidence conf-high">High confidence</span>
+      </div>
+      <div class="assumption">
+        <span class="a-num">A·06</span>
+        <span class="a-text">Short explainer video and Reels will outperform long-form written content for this audience.</span>
+        <span class="a-confidence conf-low">Low confidence</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 08 NEXT STEPS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">Moving into Ecosystem Mapping — Top 3 Priorities</span>
+      <span class="section-tag tag-gap">Next Steps</span>
+    </div>
+    <div class="next-grid">
+
+      <div class="next-card">
+        <div class="priority-badge">Priority 1</div>
+        <div class="nc-num">Research Question</div>
+        <div class="nc-title">Do HAA Members Actually Want This?</div>
+        <div class="nc-text">Before building anything, I need to test the core assumption — that HAA member organizations want civic advocacy content and will engage with it. This is what the whole practicum rests on. Getting it wrong means producing content nobody uses.</div>
+        <div class="nc-action">Schedule 3 listening conversations with HAA member org leaders before end of month</div>
+      </div>
+
+      <div class="next-card">
+        <div class="priority-badge">Priority 2</div>
+        <div class="nc-num">Research Question</div>
+        <div class="nc-title">Which Civic Processes Feel Most Urgent?</div>
+        <div class="nc-text">Not all civic processes are equally confusing or high-stakes for HAA members right now. I need to find out which moments — CB10, budget testimony, land use, elected official access — feel most pressing. That determines what to report first.</div>
+        <div class="nc-action">Ask directly in listening sessions + review CB10 minutes for arts org presence</div>
+      </div>
+
+      <div class="next-card">
+        <div class="priority-badge">Priority 3</div>
+        <div class="nc-num">Research Question</div>
+        <div class="nc-title">Is HWM the Right Publication Home?</div>
+        <div class="nc-text">Harlem World Magazine is the current publication partner but I haven't confirmed that HAA's audience trusts or reads it. If the audience doesn't already live there, it may not be the right channel for this content.</div>
+        <div class="nc-action">Request HWM audience data + ask HAA contacts directly if they read it</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">Baron Carr<span>EJ Practicum · Craig Newmark Graduate School of Journalism · CUNY · 2026</span></div>
+    <div class="footer-right">HAA Holds · Assignment 01<br>Idea to Problem Framing</div>
+  </div>
+
+</div>
+</body>
+</html>
